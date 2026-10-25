@@ -1,0 +1,13 @@
+# Java / Maven
+AirConditionerService/target/
+*.class
+# Node
+AirConditionerService-Frontend/node_modules/
+AirConditionerService-Frontend/dist/
+# IDE
+.idea/
+.vscode/
+*.iml
+# Local environment / secrets
+.env
+.DS_Store

@@ -1,0 +1,60 @@
+services:
+  postgresdb:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: airconditionerdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - springboot-postgres-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d airconditionerdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: koushik32964/docker-backend-2400032964:latest
+    build:
+      context: ./AirConditionerService
+      dockerfile: Dockerfile
+    pull_policy: build
+    container_name: docker-springboot
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgresdb:5432/airconditionerdb
+      DB_USERNAME: postgres
+      DB_PASSWORD: docker
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - springboot-postgres-net
+
+  frontend:
+    image: koushik32964/docker-frontend-2400032964:latest
+    build:
+      context: ./AirConditionerService-Frontend
+      dockerfile: Dockerfile
+    pull_policy: build
+    container_name: docker-react
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: on-failure
+    networks:
+      - springboot-postgres-net
+
+volumes:
+  postgres_data:
+
+networks:
+  springboot-postgres-net:
