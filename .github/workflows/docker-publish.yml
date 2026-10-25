@@ -2,42 +2,36 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: ["main"]
-    paths:
-      - "AirConditionerService-Frontend/**"
-      - "AirConditionerService/**"
-      - "docker-compose.yml"
-      - ".github/workflows/docker-publish.yml"
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUBDEMO_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push backend image
+      - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./AirConditionerService
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-backend-2400032964:latest
+          tags: koushik32964/docker-backend-2400032964:latest
 
-      - name: Build and push frontend image
+      - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./AirConditionerService-Frontend
           push: true
-          build-args: |
-            VITE_API_BASE_URL=http://localhost:8080/api/services
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend-2400032964:latest
+          tags: koushik32964/docker-frontend-2400032964:latest
